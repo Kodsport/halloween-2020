@@ -1,0 +1,10 @@
+.idea
+javadoc/
+out/
+*.iml
+target/
+dependency-reduced-pom.xml
+build/
+gradle/
+.gradle
+*.spook

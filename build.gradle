@@ -1,0 +1,87 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    ext.kotlin_version = '1.4.10'
+    repositories { jcenter() }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+    }
+}
+
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform' version "$kotlin_version"
+    id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version"
+}
+
+def ktor_version = '1.4.0'
+def logback_version = '1.2.3'
+def serialization_version = '1.0.0-RC2'
+
+repositories {
+    jcenter()
+    maven { url "https://dl.bintray.com/kotlin/ktor" }
+    mavenCentral()
+}
+
+kotlin {
+    jvm()
+    js {
+        browser {
+        }
+    }
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation kotlin('stdlib-common')
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_version"
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation kotlin('test-common')
+                implementation kotlin('test-annotations-common')
+            }
+        }
+        jvmMain {
+            dependencies {
+                implementation kotlin('stdlib-jdk8')
+                implementation "io.ktor:ktor-server-netty:$ktor_version"
+                implementation "io.ktor:ktor-gson:$ktor_version"
+                implementation "io.ktor:ktor-html-builder:$ktor_version"
+                implementation "ch.qos.logback:logback-classic:$logback_version"
+                implementation files("spooky.jar")
+            }
+        }
+        jvmTest {
+            dependencies {
+                implementation kotlin('test')
+                implementation kotlin('test-junit')
+            }
+        }
+        jsMain {
+            dependencies {
+                implementation kotlin('stdlib-js')
+            }
+        }
+        jsTest {
+            dependencies {
+                implementation kotlin('test-js')
+            }
+        }
+    }
+}
+
+jvmJar {
+    dependsOn(jsBrowserProductionWebpack)
+    from(new File(jsBrowserProductionWebpack.entry.name, jsBrowserProductionWebpack.outputPath))
+}
+
+task run(type: JavaExec, dependsOn: [jvmJar]) {
+    group = "application"
+    main = "halloween2020.MainKt"
+    classpath(configurations.jvmRuntimeClasspath, jvmJar)
+    jvmArgs(['--enable-preview'])
+    args = []
+}

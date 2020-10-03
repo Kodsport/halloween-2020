@@ -1,0 +1,44 @@
+// Global map information
+// Max valid magnitude of x-coordinates
+extern Width() -> Int
+// Max valid magnitude of y-coordinates
+extern Height() -> Int
+// The total number of your ships
+extern Ships() -> Int
+// Max valid magnitude of y-coordinates
+extern Planets() -> Int
+// Position of the planets, 1 to planets
+extern PlanetX(planet: Int) -> Int
+extern PlanetY(planet: Int) -> Int
+
+// Ship positions. Negative indices give opponent ships
+// X position, between -width(), +width()
+extern shipX(ship: Int) -> Int
+// Y position, between -height(), +height()
+extern ShipY(ship: Int) -> Int
+// Angle between 0 and 360'000'000 - 1. 0 means positive x-direction, angles go counter-clockwise.
+extern Ang(ship: Int) -> Int
+// Get the (non-negative) magnitude of the velocity in the direction of the angle.
+extern Vel(ship: Int) -> Int
+// Whether a ship is still alive.
+extern Alive(ship: Int) -> Boolean
+
+// Ship-firmware API
+// The index of the ship being controlled, 1 to ships()
+extern ShipName() -> Int
+// Current available energy of the ship
+extern Energy() -> Int
+// Sleep until the next tick()
+extern Tick()
+// Sets the forward thrust for this tick; positive thrust means forward, negative means breaking. Only the sign is
+// taken into account; acceleration is always the same
+extern Thrust(speed: Int)
+// Sets the side thrust for this tick; positive means rotating in positive angle-direction, negative in negative. Only
+// the sign is taken into account; angular velocity is always the same
+extern SideThrust(speed: Int)
+
+func main() {
+    for (;;) {
+        Tick();
+    }
+}
