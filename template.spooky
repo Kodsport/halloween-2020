@@ -13,7 +13,7 @@ extern PlanetY(planet: Int) -> Int
 
 // Ship positions. Negative indices give opponent ships
 // X position, between -width(), +width()
-extern shipX(ship: Int) -> Int
+extern ShipX(ship: Int) -> Int
 // Y position, between -height(), +height()
 extern ShipY(ship: Int) -> Int
 // Angle between 0 and 360'000'000 - 1. 0 means positive x-direction, angles go counter-clockwise.
