@@ -112,7 +112,8 @@ class VmSubController(executable: Executable, val game: Game, val player: Int, v
         val s = ship(shipName)
         while (s.alive && s.energy > 0 && !calledTick) {
             s.energy--
-            vm.executeInstruction()
+            if (!vm.executeInstruction())
+                s.alive = false
         }
     }
 }
