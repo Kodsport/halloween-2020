@@ -40,7 +40,7 @@ class FuncInt(val function: () -> Int) : ExternCall {
 
 class IntFuncInt(val function: (Int) -> Int) : ExternCall {
     override fun call(vm: SpookyVm) {
-        StdLib.setReturn(vm, 0, function(StdLib.getArg(vm, 1)))
+        StdLib.setReturn(vm, 1, function(StdLib.getArg(vm, 1)))
     }
 }
 
@@ -98,7 +98,7 @@ class VmSubController(executable: Executable, val game: Game, val player: Int, v
         }
         val shipPlayer = if (s > 0) { player } else { 1 - player; }
         val shipIdx = kotlin.math.abs(s)
-        if (s < 0 || s > game.playerShips[0].size) {
+        if (shipIdx < 0 || shipIdx > game.playerShips[0].size) {
             throw ShipException("Invalid ship index")
         }
         return game.playerShips[shipPlayer][shipIdx - 1]
