@@ -163,12 +163,14 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             return
         }
         var ang1 = ship1.ang.toDouble() / Constants.ANGLE_DEGREES * 2 * kotlin.math.PI
-        val ang2 = ship2.ang.toDouble() / Constants.ANGLE_DEGREES * 2 * kotlin.math.PI
-        var p = ang2 - ang1
-        while (p >= kotlin.math.PI) {
-            p -= 2 * kotlin.math.PI
+        var ang2 = ship2.ang.toDouble() / Constants.ANGLE_DEGREES * 2 * kotlin.math.PI
+        var p = (ang2 - ang1 + 2 * kotlin.math.PI) % (2 * kotlin.math.PI)
+        if (p <= kotlin.math.PI) {
+            ang2 = ang1 + p
+        } else {
+            ang2 = ang1 - (2 * kotlin.math.PI - p)
         }
-        val ang = ang1 + (1 - t) * p
+        val ang = ang1 * t + (1 - t) * ang2
 
         var x1 = ship1.pos.x
         val x2 = ship2.pos.x
