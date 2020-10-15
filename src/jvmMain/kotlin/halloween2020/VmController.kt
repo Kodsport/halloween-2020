@@ -7,6 +7,7 @@ import halloween2020.game.Vec
 import se.jsannemo.spooky.vm.ExternCall
 import se.jsannemo.spooky.vm.SpookyVm
 import se.jsannemo.spooky.vm.StdLib
+import se.jsannemo.spooky.vm.VmException
 import se.jsannemo.spooky.vm.code.Executable
 import java.lang.Exception
 
@@ -86,19 +87,16 @@ class VmSubController(executable: Executable, val game: Game, val player: Int, v
     }
 
     private fun influence(p: Int): Vec {
-        if (p < 0 || p > game.map.influenceCenters.size) {
+        if (p <= 0 || p > game.map.influenceCenters.size) {
             throw ShipException("Invalid planet index")
         }
         return game.map.influenceCenters[p - 1]
     }
 
     private fun ship(s: Int): Ship {
-        if (s == 0) {
-            throw ShipException("Invalid ship index")
-        }
         val shipPlayer = if (s > 0) { player } else { 1 - player; }
         val shipIdx = kotlin.math.abs(s)
-        if (shipIdx < 0 || shipIdx > game.playerShips[0].size) {
+        if (shipIdx <= 0 || shipIdx > game.playerShips[0].size) {
             throw ShipException("Invalid ship index")
         }
         return game.playerShips[shipPlayer][shipIdx - 1]
@@ -112,7 +110,15 @@ class VmSubController(executable: Executable, val game: Game, val player: Int, v
         val s = ship(shipName)
         while (s.alive && s.energy > 0 && !calledTick) {
             s.energy--
-            vm.executeInstruction()
+            try {
+                if (!vm.executeInstruction()) {
+                    s.alive = false
+                }
+            } catch (e: VmException) {
+                s.alive = false
+            } catch (e: ShipException) {
+                s.alive = false
+            }
         }
     }
 }

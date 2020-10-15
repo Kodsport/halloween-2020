@@ -14,6 +14,8 @@ The ships run on energy, which is use for 4 things:
 - executing instructions of the firmware.
 
 Each instruction costs 1 energy.
+If a ship, after getting hit by a laser, has negative energy, it is destroyed.
+If all ships are destroyed, the game immediately ends and the surviving player gets 1 point for each influence zone remaining (even if they do not control it) for each round left.
 
 Specific game constants and costs can be found in [Constants.kt](https://github.com/Kodsport/halloween-2020/blob/main/src/commonMain/kotlin/halloween2020/game/Constants.kt).
 Generally, all the game mechanics are in [game/](https://github.com/Kodsport/halloween-2020/tree/main/src/commonMain/kotlin/halloween2020/game).
