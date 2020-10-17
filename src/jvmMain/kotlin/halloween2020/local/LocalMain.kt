@@ -110,6 +110,18 @@ fun Application.module() {
                                                 value = "center"
                                                 +"Center"
                                             }
+                                            option {
+                                                value = "corners"
+                                                +"Corners"
+                                            }
+                                            option {
+                                                value = "sumo"
+                                                +"Sumo"
+                                            }
+                                            option {
+                                                value = "tic-tac-toe"
+                                                +"Tic-tac-toe"
+                                            }
                                         }
                                         div(classes = "input-group-append") {
                                             button(classes = "btn btn-primary", type = ButtonType.button) {
