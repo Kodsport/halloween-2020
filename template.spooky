@@ -10,6 +10,8 @@ extern Planets() -> Int
 // Position of the planets, 1 to planets
 extern PlanetX(planet: Int) -> Int
 extern PlanetY(planet: Int) -> Int
+// The radius of a single planet.
+extern PlanetRadius() -> Int
 
 // Ship positions. Negative indices give opponent ships
 // X position, between -width(), +width()

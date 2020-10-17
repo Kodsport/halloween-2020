@@ -70,6 +70,7 @@ class VmSubController(executable: Executable, val game: Game, val player: Int, v
                 .addExtern("Planets", FuncInt { game.map.influenceCenters.size })
                 .addExtern("PlanetX", IntFuncInt { p -> influence(p).x.toInt() })
                 .addExtern("PlanetY", IntFuncInt { p -> influence(p).y.toInt() })
+                .addExtern("PlanetRadius", FuncInt { game.map.influenceRadius.toInt() })
                 // Ship infos
                 .addExtern("ShipX", IntFuncInt { s -> ship(s).pos.x.toInt() })
                 .addExtern("ShipY", IntFuncInt { s -> ship(s).pos.y.toInt() })
