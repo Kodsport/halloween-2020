@@ -144,10 +144,25 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         ctx.resetTransform()
         ctx.translate(w, h)
         ctx.clearRect(-w, -h, 2 * w, 2 * h)
-        ctx.fillStyle = "#333333"
-        map.influenceCenters.forEach {
+        map.influenceCenters.forEach { planet ->
+			var rad = map.influenceRadius
+			var influence = 0
+			turn1.ships[0].forEach(fun(ship: Ship) {
+				if (!ship.alive) return
+				if ((ship.pos - planet).dist2() > rad * rad) return
+				influence++
+			})
+			turn1.ships[1].forEach(fun(ship: Ship) {
+				if (!ship.alive) return
+				if ((ship.pos - planet).dist2() > rad * rad) return
+				influence--
+			})
+			if (influence > 0) ctx.fillStyle = "#993333"
+			else if (influence < 0) ctx.fillStyle = "#333399"
+			else ctx.fillStyle = "#333333"
+			
             ctx.beginPath()
-            ctx.arc(it.x, it.y, map.influenceRadius.toDouble(), 0.0, 2 * kotlin.math.PI)
+            ctx.arc(planet.x, planet.y, map.influenceRadius.toDouble(), 0.0, 2 * kotlin.math.PI)
             ctx.fill()
         }
         turn1.ships[0].forEachIndexed { index, ship ->
@@ -187,23 +202,23 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         val y = y1 * t + y2 * (1 - t)
 
         ctx.save()
-        ctx.fillStyle = col
-        ctx.beginPath()
         ctx.translate(x, y)
         ctx.rotate(ang)
-        ctx.arc(0.0, 0.0, 40.0, -2.0, 2.0)
+		
+		if (ship1.firing) {
+            ctx.fillStyle = "#ffffff"
+            ctx.fillRect(-5.0, 0.0, 400.0, 5.0)
+        }
+		
+        ctx.fillStyle = col
+        ctx.beginPath()
+		ctx.moveTo(40.0, 0.0)
+		ctx.lineTo(-40.0, -30.0)
+		ctx.lineTo(-30.0, 0.0)
+		ctx.lineTo(-40.0, 30.0)
         ctx.closePath()
         ctx.fill()
         ctx.restore()
-
-        if (ship1.firing) {
-            ctx.save()
-            ctx.fillStyle = "#ffffff"
-            ctx.translate(x, y)
-            ctx.rotate(ang)
-            ctx.fillRect(0.0, 0.0, 400.0, 10.0)
-            ctx.restore()
-        }
     }
 
 }
