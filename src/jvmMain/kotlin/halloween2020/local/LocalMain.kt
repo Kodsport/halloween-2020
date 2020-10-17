@@ -105,10 +105,11 @@ fun Application.module() {
                                         }
                                         select(classes = "custom-select") {
                                             id = "map-selector"
-                                            option {
-                                                selected = true
-                                                value = "center"
-                                                +"Center"
+                                            for (name in GameMaps.Maps.keys) {
+                                                option {
+                                                    value = name
+                                                    +name.capitalize()
+                                                }
                                             }
                                         }
                                         div(classes = "input-group-append") {
