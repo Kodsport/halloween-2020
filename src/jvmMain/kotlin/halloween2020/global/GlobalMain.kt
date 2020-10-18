@@ -70,6 +70,15 @@ fun Application.module() {
         get("/") {
            index(call)
         }
+        get("/matches") {
+            recentMatches(call)
+        }
+        get("/matches/{key}") {
+            match(call)
+        }
+        get("/ranklist") {
+            ranklist(call)
+        }
         requireAuth {
             route("/team") {
                 get {
@@ -85,17 +94,8 @@ fun Application.module() {
                     uploadFirmware(call)
                 }
             }
-            get("/matches") {
-                recentMatches(call)
-            }
-            get("/matches/{key}") {
-                match(call)
-            }
             get("/firmware/{firmware}") {
                 firmwareMatches(call)
-            }
-            get("/ranklist") {
-                ranklist(call)
             }
             get("/logout") {
                 call.sessions.clear<UserSession>()
