@@ -81,7 +81,20 @@ class Member(id: EntityID<Int>) : IntEntity(id) {
 }
 
 object Db {
-    val db: Database = Database.connect("jdbc:" + System.getenv("DATABASE_URL"), driver = "org.h2.Driver")
+    val db: Database = Database.connect(dbUrl(), driver = "org.h2.Driver")
+
+    fun dbUrl(): String {
+        Class.forName("org.postgresql.Driver")
+        val env = System.getenv("DATABASE_URL")
+        return if (env.startsWith("postgres:")) {
+            val user = env.substringAfter("postgres://").substringBefore("@")
+            val host = env.substringAfter("@").substringBefore("/")
+            val db = env.substringAfterLast("/")
+            "jdbc:postgresql://${host}/${db}?user=${user.substringBefore(":")}&password=${user.substringAfter(":")}"
+        } else {
+            "jdbc:$env"
+        }
+    }
 
     init {
         transaction {

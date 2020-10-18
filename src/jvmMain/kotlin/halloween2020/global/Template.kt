@@ -60,7 +60,7 @@ fun BODY.menu(login: Boolean) {
                span(classes = "navbar-toggler-icon") { }
            }
            div(classes = "collapse navbar-collapse") {
-               id = "navbarSupportedContent"
+               id = "navbarContent"
                ul(classes = "navbar-nav mr-auto") {
                    li {
                        a(classes = "nav-link", href = "/") {

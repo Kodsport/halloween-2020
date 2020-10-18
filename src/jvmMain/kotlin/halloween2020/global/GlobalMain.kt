@@ -27,7 +27,7 @@ import kotlin.time.ExperimentalTime
 fun globalMain() {
     Db // init database
     Matchmaking.start()
-    embeddedServer(Netty, port = 8080, host = "127.0.0.1", module = Application::module).start(wait = true)
+    embeddedServer(Netty, port = (System.getenv("PORT")?:"8080").toInt(), host = "0.0.0.0", module = Application::module).start(wait = true)
 }
 
 val UserKey: AttributeKey<Member> = AttributeKey("User")
