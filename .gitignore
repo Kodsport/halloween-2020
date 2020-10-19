@@ -8,5 +8,4 @@ build/
 .gradle
 *.spook
 *.db
-Dockerfile
 deploy.sh
