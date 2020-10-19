@@ -3,8 +3,8 @@ package halloween2020.game
 class Game(val map: GameMap) {
 
     val playerShips = listOf(
-            map.shipPos.map { pos -> Ship(pos, 0) },
-            map.shipPos.map { pos -> Ship(pos.mirror(), Constants.ANGLE_DEGREES / 2) })
+            map.shipPos.map { pos -> Ship(pos.perturb(), 0) },
+            map.shipPos.map { pos -> Ship(pos.mirror().perturb(), Constants.ANGLE_DEGREES / 2) })
     private val score = intArrayOf(0, 0)
     private var playedRounds = 0
         fun get() = playedRounds

@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.random.Random
 
 
 @Serializable
@@ -59,6 +60,10 @@ data class Vec(val x: Double, val y: Double) {
 
     private fun perp(): Vec {
         return Vec(-y, x)
+    }
+
+    fun perturb(): Vec {
+        return Vec(x + Random.nextDouble(-3.0, 3.0), y + Random.nextDouble(-3.0, 3.0))
     }
 
 }
