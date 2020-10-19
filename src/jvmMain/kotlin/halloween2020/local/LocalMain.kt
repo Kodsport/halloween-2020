@@ -148,6 +148,7 @@ fun Application.module() {
         static("/static") {
             resource("halloween-2020.js")
             resource("halloween-2020.js.map")
+            resources("static")
         }
     }
 }

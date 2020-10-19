@@ -10,6 +10,8 @@ import kotlinx.browser.window
 import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.HTMLCanvasElement
 import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.Image
+import kotlin.random.Random
 
 class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
 
@@ -18,6 +20,18 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
     private var frame = -1
     private var lastFrame = 0.0
     private val ctx = canvas.getContext("2d") as CanvasRenderingContext2D
+    private var waiting = 0
+    private val planets = IntProgression.fromClosedRange(0, 17, 1).map {
+        val drawing = Image()
+        drawing.src = "/static/planet$it.png"
+        waiting += 1
+        drawing.onload = {
+            waiting -= 1
+            null
+        }
+        drawing
+    }
+    private val stars = mutableListOf<Pair<Double, Double>>()
 
     fun play(response: SimulateResponse) {
         frame = -1
@@ -26,6 +40,9 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         canvas.width = (response.map.bounds.x * 2.0).toInt()
         canvas.height = (response.map.bounds.y * 2.0).toInt()
         (document.getElementById("round") as HTMLInputElement).setAttribute("max", response.map.rounds.toString())
+        for (i in 0 until 250) {
+            stars.add(Pair(Random.nextDouble() * canvas.width, Random.nextDouble() * canvas.height))
+        }
         if (!active) {
             start()
         }
@@ -37,6 +54,10 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
     }
 
     private fun frame(t: Double) {
+        if (waiting != 0) {
+            window.requestAnimationFrame(this::frame)
+            return
+        }
         val res = playing
         if (res == null) {
             active = false
@@ -69,11 +90,19 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         ctx.resetTransform()
         ctx.translate(w, h)
         ctx.clearRect(-w, -h, 2 * w, 2 * h)
+        for (star in stars) {
+            val intensity = (((star.first - w) * (star.second - h)) % 255 + 255) % 255
+            ctx.fillStyle = "rgb($intensity,$intensity,$intensity)"
+            console.log(star.first - w, star.second - h, ctx.fillStyle)
+            ctx.fillRect(star.first - w, star.second - h, 5.0, 5.0)
+
+        }
         ctx.fillStyle = "#333333"
-        map.influenceCenters.forEach {
-            ctx.beginPath()
-            ctx.arc(it.x, it.y, map.influenceRadius.toDouble(), 0.0, 2 * kotlin.math.PI)
-            ctx.fill()
+        map.influenceCenters.forEachIndexed { i, it ->
+            val planet = planets[i % planets.size]
+            ctx.drawImage(planet,
+                    44.0, 44.0, 207.0, 207.0,
+                    it.x - map.influenceRadius, it.y - map.influenceRadius, 2.0 * map.influenceRadius, 2.0 * map.influenceRadius)
         }
         turn1.ships[0].forEachIndexed { index, ship ->
             drawShip("#ff0000", ship, turn2.ships[0][index], t)
