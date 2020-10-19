@@ -95,7 +95,7 @@ object Matchmaking {
 
     fun eloCalc(e1: Double, e2: Double, s1: Int, s2: Int): Pair<Double, Double> {
         val exp1 = 1.0 / (1 + Math.pow(10.0, (e2 - e1) / 400))
-        val act1 = if (s1 == s2) { 0.5 } else { s1.toDouble() / (s1 + s2) }
+        val act1 = (if (s1 == s2) { 0.5 } else if (s1 > s2) { 1 } else { 0 }).toDouble()
         val inc = 32 * (act1 - exp1)
         return Pair(e1 + inc, e2 - inc)
     }

@@ -108,6 +108,7 @@ fun DIV.matches(matches: List<Match>) {
             tr {
                 th { +"Team A" }
                 th { +"Team B" }
+                th { +"Map" }
                 th { +"Score" }
                 th { +"Played at" }
                 th { +"" }
@@ -124,6 +125,7 @@ fun DIV.matches(matches: List<Match>) {
                 tr {
                     td { +team1!!.name }
                     td { +team2!!.name }
+                    td { +it.map }
                     td { +"%d - %d".format(it.s1, it.s2) }
                     td { +it.played.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)) }
                     td {
