@@ -93,16 +93,35 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         for (star in stars) {
             val intensity = (((star.first - w) * (star.second - h)) % 255 + 255) % 255
             ctx.fillStyle = "rgb($intensity,$intensity,$intensity)"
-            console.log(star.first - w, star.second - h, ctx.fillStyle)
             ctx.fillRect(star.first - w, star.second - h, 5.0, 5.0)
 
         }
-        ctx.fillStyle = "#333333"
-        map.influenceCenters.forEachIndexed { i, it ->
-            val planet = planets[i % planets.size]
-            ctx.drawImage(planet,
-                    44.0, 44.0, 207.0, 207.0,
-                    it.x - map.influenceRadius, it.y - map.influenceRadius, 2.0 * map.influenceRadius, 2.0 * map.influenceRadius)
+        ctx.lineWidth = 20.0
+        map.influenceCenters.forEachIndexed { i, planet ->
+            val img = planets[i % planets.size]
+            val dw = map.influenceRadius * 1.17
+            ctx.drawImage(img,
+                    37.0, 37.0, 226.0, 226.0,
+                    planet.x - dw, planet.y - dw, 2.0 * dw, 2.0 * dw)
+
+            var rad = map.influenceRadius
+            var influence = 0
+            turn1.ships[0].forEach(fun(ship: Ship) {
+                if (!ship.alive) return
+                if ((ship.pos - planet).dist2() > rad * rad) return
+                influence++
+            })
+            turn1.ships[1].forEach(fun(ship: Ship) {
+                if (!ship.alive) return
+                if ((ship.pos - planet).dist2() > rad * rad) return
+                influence--
+            })
+            if (influence > 0) ctx.strokeStyle = "#993333"
+            else if (influence < 0) ctx.strokeStyle = "#333399"
+            else ctx.strokeStyle = "#333333"
+            ctx.beginPath()
+            ctx.arc(planet.x, planet.y, map.influenceRadius.toDouble(), 0.0, 2 * kotlin.math.PI)
+            ctx.stroke()
         }
         turn1.ships[0].forEachIndexed { index, ship ->
             drawShip("#ff0000", ship, turn2.ships[0][index], t)

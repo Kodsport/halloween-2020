@@ -65,6 +65,38 @@ object GameMaps {
                     ),
                     50,
                     1000
-            )
+            ),
+            "no ordinary moon" to GameMap(
+                    Vec(1800.0, 1200.0),
+                    (-5..5).map {i -> Vec(-kotlin.math.sqrt(1200.0*1200-200*200*i*i), 200.0*i)},
+                    listOf(Vec(0.0, 0.0)),
+                    1200,
+                    1000
+            ),
+            "faceoff" to GameMap(
+                    Vec(1800.0, 1200.0),
+                    (-3..3).map {i -> Vec(100.0, 100.0*i) },
+                    listOf(Vec(0.0, 800.0), Vec(0.0, -800.0),
+                            Vec(-800.0, 800.0), Vec(-800.0, -800.0),
+                            Vec(800.0, 800.0), Vec(800.0, -800.0)),
+                    300,
+                    1000
+            ),
+            "random" to GameMap(
+                    Vec(1800.0, 1200.0),
+                    (1..10).map { i -> Vec( (-1500..1500).random().toDouble(), (-900..900).random().toDouble() ) },
+                    (1..30).map { i -> Vec( (-1500..1500).random().toDouble(), (-900..900).random().toDouble() ) },
+                    100,
+                    1000
+            ),
+            "divine order" to GameMap(
+                    Vec(1800.0, 1200.0),
+                    (0..6).flatMap { i -> (1..4).map { r -> Vec(-1000 + 100*r*kotlin.math.cos((i-r*r/40.0)/7.0*2*kotlin.math.PI),
+                            0 + 100*r*kotlin.math.sin((i-r*r/40.0)/7.0*2*kotlin.math.PI))}},
+                    listOf(Vec(-1000.0, 0.0), Vec(1000.0, 0.0),
+                            Vec(0.0, 600.0), Vec(0.0, -600.0)),
+                    450,
+                    1000
+            ),
     )
 }
