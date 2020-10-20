@@ -84,8 +84,8 @@ object GameMaps {
             ),
             "random" to GameMap(
                     Vec(1800.0, 1200.0),
-                    (1..10).map { i -> Vec( (-1500..1500).random().toDouble(), (-900..900).random().toDouble() ) },
-                    (1..30).map { i -> Vec( (-1500..1500).random().toDouble(), (-900..900).random().toDouble() ) },
+                    (1..10).map { i -> Vec( i * i * 879232 % 3000 - 1500.0, i * i * 238629 % 1800 - 900.0) },
+                    (1..30).map { i -> Vec(i * i * 348723 % 3000 - 1500.0,  i * i * 872342 % 1800 - 900.0) },
                     100,
                     1000
             ),

@@ -14,10 +14,10 @@ class Game(val map: GameMap) {
     }
 
     fun tick(controllers: List<GameController>) {
+        controllers.forEach(GameController::tick)
         updateShips(controllers)
         checkFire()
         updateScores()
-        controllers.forEach(GameController::tick)
         playedRounds += 1
     }
 
