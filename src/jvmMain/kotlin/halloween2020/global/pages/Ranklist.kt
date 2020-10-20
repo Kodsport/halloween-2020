@@ -9,20 +9,16 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 suspend fun ranklist(call: ApplicationCall) {
     template(call) {
-        val elos = mutableMapOf<Int, Double>()
-        val teams = mutableMapOf<Int, Team>()
+        val results = mutableMapOf<Team, Double>()
         transaction(transactionIsolation = DEFAULT_ISOLATION_LEVEL, repetitionAttempts = 0) {
-            Firmware.all().forEach {
-                val team = it.team.id.value
-                val elo = it.elo
-                elos[team] = kotlin.math.max(elo, elos.getOrDefault(team, 0.0))
-            }
             Team.all().forEach {
-                teams[it.id.value] = it
+                val fw = it.firmwares.orderBy(Pair(Firmwares.id, SortOrder.DESC)).limit(1).singleOrNull()
+                if (fw != null) {
+                    results[it] = fw.elo
+                }
             }
         }
-        val results = elos.mapKeys { entry -> teams[entry.key]!! }.entries.sortedByDescending { entry -> entry.value }
-        ranklist(results)
+        ranklist(results.entries.sortedByDescending { it.value }.toList())
     }
 }
 
