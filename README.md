@@ -24,6 +24,8 @@ Generally, all the game mechanics are in [game/](https://github.com/Kodsport/hal
 Firmware is written as [Spooky](https://github.com/jsannemo/spooky-vm) programs.
 There is a [template](https://github.com/Kodsport/halloween-2020/blob/main/template.spooky) which includes all the API functions your program can use to control the ship and investigate the current game state.
 
+To compile your firmware, place your `inputfile.spooky` in the root of the repository and run `java --enable-preview -jar spooky.jar compile inputfile.spooky outputfile.spook`.
+
 ## Local test environment
 To run the local test environment, run `./gradlew run`.
 The test environemnt is then reachable from [localhost:8080](http://localhost:8080).
