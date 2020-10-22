@@ -44,6 +44,17 @@ class Game(val map: GameMap) {
         if (playedRounds >= map.rounds) {
             return true
         }
+        val roundsLeft = map.rounds - playedRounds
+        val bonusPoints = map.influenceCenters.size * roundsLeft
+        if (score[0] > score[1] + bonusPoints) {
+            score[0] += bonusPoints
+            return true
+        }
+        if (score[1] > score[0] + bonusPoints) {
+            score[1] += bonusPoints
+            return true
+        }
+
         val p1Ships = playerShips[0].map { ship -> ship.alive }.contains(true)
         val p2Ships = playerShips[1].map { ship -> ship.alive }.contains(true)
         if (p1Ships && p2Ships) {
@@ -53,7 +64,6 @@ class Game(val map: GameMap) {
             return true
         }
         // Now exact one player has alive ships
-        val bonusPoints = map.influenceCenters.size * (map.rounds - playedRounds)
         if (p1Ships) {
             score[0] += bonusPoints
         } else {

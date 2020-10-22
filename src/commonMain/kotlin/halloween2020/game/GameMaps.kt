@@ -100,6 +100,13 @@ object GameMaps {
                     100,
                     1000
             ),
+            "randomv2" to GameMap(
+                    Vec(1800.0, 1200.0),
+                    (0..10).map { i -> Vec( (i * i * i * 879232L % 3000 + 3000) % 3000 - 1500.0, (i * i * i * 238629L % 1800 + 1800) % 1800 - 900.0) },
+                    (-15..-1).union(1..15).map { i -> Vec((i * i * i * 348723L % 1800).toDouble() ,  (i * i * i * 872342L % 1200).toDouble()) },
+                    100,
+                    1000
+            ),
             "divine order" to GameMap(
                     Vec(1800.0, 1200.0),
                     (0..6).flatMap { i -> (1..4).map { r -> Vec(-1000 + 100*r*kotlin.math.cos((i-r*r/40.0)/7.0*2*kotlin.math.PI),
