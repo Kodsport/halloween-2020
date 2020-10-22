@@ -15,12 +15,14 @@ object GameMaps {
                     200,
                     1000
             ),
-            "armada" to GameMap(
+            "armadav2" to GameMap(
                     Vec(2250.0, 1500.0),
                     (1..10).flatMap { r -> (0..10+r).map { theta -> Vec(-2000.0+(250+90.0*r)*kotlin.math.sin(theta/(10.0+r)*kotlin.math.PI),
                             (250+90.0*r)*kotlin.math.cos(theta/(10.0+r)*kotlin.math.PI)) } },
                     listOf(Vec(-2000.0, -0.0),
-                            Vec(2000.0, 0.0)),
+                            Vec(2000.0, 0.0),
+                            Vec(0.0, 0.0),
+                    ),
                     200,
                     1000
             ),
