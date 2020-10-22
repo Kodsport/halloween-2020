@@ -46,6 +46,15 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         if (!active) {
             start()
         }
+
+        // Allow the user to choose frame
+        val roundSlider = document.getElementById("round") as HTMLInputElement
+        roundSlider.oninput = {
+            frame = roundSlider.value.toInt()
+            if (!active) {
+                start()
+            }
+        }
     }
 
     private fun start() {
@@ -63,6 +72,11 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             active = false
             return
         }
+        // Avoid playing if the user inputs an invalid frame
+        if (frame >= res.results.size - 1) {
+            active = false
+            return
+        }
         if (frame == -1) {
             frame = 0
             lastFrame = t
@@ -75,7 +89,7 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
                 document.getElementById("player2-score")?.textContent = "" + res.results[frame].p2Score
                 (document.getElementById("round") as HTMLInputElement).valueAsNumber = frame.toDouble()
                 lastFrame = t
-                if (frame == res.results.size - 1) {
+                if (frame >= res.results.size - 1) {
                     active = false
                     return
                 }
