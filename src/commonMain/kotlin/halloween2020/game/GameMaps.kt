@@ -24,6 +24,17 @@ object GameMaps {
                     200,
                     1000
             ),
+            "armadav2" to GameMap(
+                    Vec(2250.0, 1500.0),
+                    (1..10).flatMap { r -> (0..10+r).map { theta -> Vec(-2000.0+(250+90.0*r)*kotlin.math.sin(theta/(10.0+r)*kotlin.math.PI),
+                            (250+90.0*r)*kotlin.math.cos(theta/(10.0+r)*kotlin.math.PI)) } },
+                    listOf(Vec(-2000.0, -0.0),
+                            Vec(2000.0, 0.0),
+                            Vec(0.0, 0.0),
+                    ),
+                    200,
+                    1000
+            ),
             "corners" to GameMap(
                     Vec(900.0 * 2, 600.0 * 2),
                     listOf(
@@ -86,6 +97,13 @@ object GameMaps {
                     Vec(1800.0, 1200.0),
                     (1..10).map { i -> Vec( i * i * 879232 % 3000 - 1500.0, i * i * 238629 % 1800 - 900.0) },
                     (1..30).map { i -> Vec(i * i * 348723 % 3000 - 1500.0,  i * i * 872342 % 1800 - 900.0) },
+                    100,
+                    1000
+            ),
+            "randomv2" to GameMap(
+                    Vec(1800.0, 1200.0),
+                    (0..10).map { i -> Vec( (i * i * i * 879232L % 3000 + 3000) % 3000 - 1500.0, (i * i * i * 238629L % 1800 + 1800) % 1800 - 900.0) },
+                    (-15..-1).union(1..15).map { i -> Vec((i * i * i * 348723L % 1800).toDouble() ,  (i * i * i * 872342L % 1200).toDouble()) },
                     100,
                     1000
             ),
