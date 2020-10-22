@@ -67,9 +67,9 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             frame = 0
             lastFrame = t
         } else {
-            val T = kotlin.math.max(0.0, kotlin.math.min((t - lastFrame) / 200, 1.0))
+            val T = kotlin.math.max(0.0, kotlin.math.min((t - lastFrame) / 100, 1.0))
             draw(res.map, res.results[frame], res.results[frame + 1], 1 - T)
-            if (t - lastFrame > 200) {
+            if (t - lastFrame > 100) {
                 frame += 1
                 document.getElementById("player1-score")?.textContent = "" + res.results[frame].p1Score
                 document.getElementById("player2-score")?.textContent = "" + res.results[frame].p2Score
