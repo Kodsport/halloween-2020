@@ -9,6 +9,7 @@ class Ship(var pos: Vec, var ang: Int) {
     var alive: Boolean = true
     var vel: Double = 0.0
     var firing: Boolean = false
+    var underFire: Boolean = false
     var acc: Int = 0
     var angv: Int = 0
 

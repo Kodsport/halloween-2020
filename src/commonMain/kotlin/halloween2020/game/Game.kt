@@ -27,6 +27,9 @@ class Game(val map: GameMap) {
                 if (ship.alive) {
                     playerShips[1 - player].forEach {
                         it.energy -= ship.firesAt(it)
+                        if (ship.firesAt(it) > 0) {
+                            it.underFire = true
+                        }
                     }
                 }
             }
@@ -100,6 +103,7 @@ class Game(val map: GameMap) {
                 if (ship.alive) {
                     ship.tick(index, controllers[player], this)
                 }
+                ship.underFire = false
             }
         }
     }

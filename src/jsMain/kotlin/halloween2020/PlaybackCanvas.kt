@@ -196,7 +196,6 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         ctx.save()
         ctx.translate(x, y)
         ctx.strokeStyle = "#00ff00"
-        ctx.fillStyle = "#000000"
         ctx.lineWidth = 5.0
         ctx.beginPath()
         ctx.moveTo(-10.0, 60.0)
@@ -213,6 +212,13 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             }
         else
             ctx.lineWidth = 5.0
+        if (ship1.underFire) {
+            ctx.fillStyle = col
+            ctx.shadowColor = "#ffffff"
+            ctx.shadowBlur = 10.0
+            }
+        else
+            ctx.fillStyle = "#000000"
         ctx.beginPath()
         ctx.rotate(ang)
         ctx.moveTo(-10.0, 0.0)
