@@ -276,7 +276,7 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             ctx.strokeStyle = "rgb(255, $hue, 255)";
             ctx.shadowColor = "#ffffff"
             ctx.shadowBlur = 20.0
-            ctx.lineTo(500.0, 0.0)
+            ctx.lineTo(400.0, 0.0)
             ctx.closePath();
             ctx.stroke()
             ctx.restore();
