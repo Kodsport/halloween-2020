@@ -11,6 +11,7 @@ import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.HTMLCanvasElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.Image
+import org.w3c.dom.*
 import kotlin.random.Random
 
 class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
@@ -32,7 +33,6 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         drawing
     }
     private val stars = mutableListOf<Pair<Double, Double>>()
-
     fun play(response: SimulateResponse) {
         frame = -1
         lastFrame = 0.0
@@ -146,6 +146,24 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         }
     }
 
+    private fun drawThruster(x: Double, y: Double, ang: Double, offset: Double)
+    {
+            ctx.save()
+            ctx.translate(x,y)
+            ctx.rotate(ang)
+            ctx.beginPath()
+            val intensity = 100 + Random.nextDouble() * 155
+            ctx.fillStyle = "rgb($intensity,$intensity,$intensity)"
+            ctx.moveTo(-25.0, 0.0 + offset)
+            ctx.lineTo(-40.0, -10.0 + offset)
+            ctx.lineTo(-65.0, 0.0 + offset)
+            ctx.lineTo(-40.0, +10.0 + offset)
+            ctx.lineTo(-25.0, 0.0 + offset)
+            ctx.closePath()
+            ctx.fill()
+            ctx.restore()
+    }
+
     private fun drawShip(col: String, ship1: Ship, ship2: Ship, t: Double) {
         if (!ship1.alive) {
             return
@@ -174,24 +192,88 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         }
         val y = y1 * t + y2 * (1 - t)
 
+        // Engergy bar:
         ctx.save()
-        ctx.fillStyle = col
-        ctx.beginPath()
         ctx.translate(x, y)
+        ctx.strokeStyle = "#00ff00"
+        ctx.fillStyle = "#000000"
+        ctx.lineWidth = 5.0
+        ctx.beginPath()
+        ctx.moveTo(-10.0, 60.0)
+        ctx.lineTo(-10.0 +  ship1.energy.toDouble() * 40.0/100000.0, +60.0)
+        ctx.closePath()
+        ctx.stroke()
+
+        // Hull
+        ctx.strokeStyle = col
+        if (ship1.firing || ship1.acc > 0 || ship1.angv != 0) {
+            ctx.shadowColor = col
+            ctx.shadowBlur = 15.0
+            ctx.lineWidth = 5.0
+            }
+        else
+            ctx.lineWidth = 5.0
+        ctx.beginPath()
         ctx.rotate(ang)
-        ctx.arc(0.0, 0.0, 40.0, -2.0, 2.0)
+        ctx.moveTo(-10.0, 0.0)
+        ctx.lineTo(-10.0, -40.0)
+        ctx.lineTo(10.0, -38.0)
+        ctx.lineTo(40.0, -15.0)
+        ctx.lineTo(40.0, 15.0)
+        ctx.lineTo(10.0, 38.0)
+        ctx.lineTo(-10.0, 40.0)
+        ctx.lineTo(-10.0, 0.0)
+        ctx.moveTo(40.0, 0.0)
+        ctx.lineTo(50.0, 0.0)
         ctx.closePath()
         ctx.fill()
+        ctx.stroke()
+
+        // Hull complications
+        ctx.beginPath()
+        ctx.lineWidth = 3.0
+        ctx.lineJoin = CanvasLineJoin.Companion.ROUND
+        ctx.moveTo(20.0, 0.0)
+        ctx.lineTo(-10.0, 0.0)
+        ctx.moveTo(20.0, 0.0)
+        ctx.lineTo(-10.0, 25.0)
+        ctx.lineTo(40.0, 15.0)
+        ctx.lineTo(20.0, 0.0)
+        ctx.lineTo(40.0, -15.0)
+        ctx.lineTo(-10.0, -25.0)
+        ctx.lineTo(20.0, 0.0)
+        ctx.moveTo(-10.0, -25.0)
+        ctx.lineTo(10.0, -38.0)
+        ctx.moveTo(-10.0, 25.0)
+        ctx.lineTo(10.0, 38.0)
+        ctx.closePath()
+        ctx.stroke()
         ctx.restore()
+
+        // Thrusters and laser:
+        if (ship1.acc > 0 || ship1.angv < 0 ) {
+            drawThruster(x, y, ang, 20.0)
+        }
+        if (ship1.acc > 0 || ship1.angv > 0) {
+            drawThruster(x, y, ang, -20.0)
+        }
 
         if (ship1.firing) {
             ctx.save()
-            ctx.fillStyle = "#ffffff"
-            ctx.translate(x, y)
+            ctx.beginPath();
+            ctx.lineWidth = 1.0 + Random.nextDouble(3.0)
+            ctx.translate(x,y)
             ctx.rotate(ang)
-            ctx.fillRect(0.0, 0.0, 400.0, 10.0)
-            ctx.restore()
+            ctx.moveTo(50.0, 0.0);
+            var hue = 200
+            hue += Random.nextInt(55)
+            ctx.strokeStyle = "rgb(255, $hue, 255)";
+            ctx.shadowColor = "#ffffff"
+            ctx.shadowBlur = 20.0
+            ctx.lineTo(500.0, 0.0)
+            ctx.closePath();
+            ctx.stroke()
+            ctx.restore();
         }
     }
-
 }
