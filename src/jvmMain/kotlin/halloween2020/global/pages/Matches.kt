@@ -76,6 +76,18 @@ suspend fun match(call: ApplicationCall) {
                     id = "playback"
                     classes = setOf("simulation", "")
                 }
+                div(classes = "text-center mt-3") {
+                    +"Playback speed"
+                }
+                input(classes = "form-control-range", type = InputType.range) {
+                    id = "playback-speed"
+                    max = "9"
+                    min = "1"
+                    value = "5"
+                }
+                br {
+                    style = "margin-bottom: 64px"
+                }
             }
         }
         span(classes = "d-none") {
