@@ -172,9 +172,15 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             ctx.save()
             ctx.translate(x,y)
             ctx.rotate(ang)
-            ctx.beginPath()
+            var grd = ctx.createRadialGradient(-30.0, 0.0 + offset, 5.0, -30.0, 0.0 + offset, 20.0);
+            grd.addColorStop(0.0, "white");
             val intensity = 100 + Random.nextDouble() * 155
-            ctx.fillStyle = "rgb($intensity,$intensity,$intensity)"
+            grd.addColorStop(1.0, "rgb(255, $intensity, 0)");
+
+            ctx.beginPath()
+            ctx.fillStyle = grd
+            ctx.shadowColor = "#ffffff"
+            ctx.shadowBlur = 10.0 
             ctx.lineWidth = 1.0
             ctx.moveTo(-25.0, 0.0 + offset)
             ctx.lineTo(-40.0, -10.0 + offset)
@@ -234,17 +240,16 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
 
         // Hull
         ctx.strokeStyle = col
-        if (ship1.firing || ship1.acc > 0 || ship1.angv != 0) {
-            ctx.shadowColor = col
-            ctx.shadowBlur = 15.0
-            ctx.lineWidth = 5.0
+        ctx.lineWidth = 5.0
+        ctx.shadowBlur = 15.0
+        if (ship1.firing) {
+            ctx.shadowColor = "#ffffff"
         } else {
-            ctx.lineWidth = 5.0
+            ctx.shadowColor = col 
         }
         if (ship1.underFire) {
             ctx.fillStyle = col
             ctx.shadowColor = "#ffffff"
-            ctx.shadowBlur = 10.0
         } else {
             ctx.fillStyle = "#000000"
         }
@@ -305,7 +310,7 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             ctx.strokeStyle = "rgb(255, $hue, 255)";
             ctx.shadowColor = "#ffffff"
             ctx.shadowBlur = 20.0
-            ctx.lineTo(400.0, 0.0)
+            ctx.lineTo(Constants.FIRE_DISTANCE.toDouble(), 0.0)
             ctx.closePath();
             ctx.stroke()
             ctx.restore();
