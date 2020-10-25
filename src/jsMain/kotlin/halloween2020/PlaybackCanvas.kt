@@ -34,6 +34,7 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
     }
     private val explodedShips = mutableSetOf<Int>()
     private var explosions = mutableListOf<Pair<Pair<Double, Double>, Pair<Double, Double>>>()
+    private var total_num_ships: Int = 0
     private val stars = mutableListOf<Pair<Double, Double>>()
     fun play(response: SimulateResponse) {
         frame = -1
@@ -158,6 +159,8 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         }
 	explosions = nextExplosions
 
+        total_num_ships = map.shipPos.size
+
         turn1.ships[0].forEachIndexed { index, ship ->
             drawShip("#ff0000", ship, turn2.ships[0][index], index, t)
         }
@@ -219,9 +222,9 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         if (!ship1.alive) {
               if (!explodedShips.contains(index)) {
                   explodedShips.add(index)
-                  for (i in 0 until 250) {
+                  for (i in 0 until 2500/total_num_ships) {
                        val angle = Random.nextDouble() * kotlin.math.PI * 2
-                       explosions.add(Pair(Pair(x,y), Pair(kotlin.math.cos(angle) * Random.nextDouble()*20, kotlin.math.sin(angle)*Random.nextDouble()*20)))
+                       explosions.add(Pair(Pair(x,y), Pair(kotlin.math.cos(angle) * (Random.nextDouble()*10 + 10), kotlin.math.sin(angle)*(Random.nextDouble()*10 + 10))))
                   }
               }
 	      return
