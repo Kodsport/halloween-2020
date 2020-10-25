@@ -170,11 +170,8 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
 
     }
 
-    private fun drawThruster(x: Double, y: Double, ang: Double, offset: Double)
+    private fun drawThruster(offset: Double)
     {
-            ctx.save()
-            ctx.translate(x,y)
-            ctx.rotate(ang)
             var grd = ctx.createRadialGradient(-30.0, 0.0 + offset, 5.0, -30.0, 0.0 + offset, 20.0);
             grd.addColorStop(0.0, "white");
             val intensity = 100 + Random.nextDouble() * 155
@@ -192,9 +189,91 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             ctx.lineTo(-25.0, 0.0 + offset)
             ctx.closePath()
             ctx.fill()
-            ctx.restore()
+    }
+ 
+    private fun drawBeam() {
+            ctx.beginPath()
+            ctx.lineWidth = 2.0
+            ctx.moveTo(50.0, 0.0)
+            var hue = 200
+            hue += Random.nextInt(55)
+            ctx.strokeStyle = "rgb(255, $hue, 255)";
+            ctx.shadowColor = "#ffffff"
+            ctx.shadowBlur = 20.0
+            ctx.lineTo(Constants.FIRE_DISTANCE.toDouble(), 0.0)
+            ctx.closePath();
+            ctx.stroke()
     }
 
+    private fun drawBar(energy: Int) { 
+        ctx.lineWidth = 5.0
+        ctx.strokeStyle = "#ff0000"
+        ctx.shadowColor = "#ff0000"
+        ctx.beginPath()
+        ctx.moveTo(-10.0, 60.0)
+        ctx.lineTo(-10.0 +  40.0, +60.0)
+        ctx.closePath()
+        ctx.stroke()
+        ctx.strokeStyle = "#00ff00"
+        ctx.shadowColor = "#00ff00"
+        ctx.beginPath()
+        ctx.moveTo(-10.0, 60.0)
+        ctx.lineTo(-10.0 +  energy.toDouble() * 40.0/100000.0, +60.0)
+        ctx.closePath()
+        ctx.stroke()
+    }
+
+    private fun drawHull(col: String, firing: Boolean, underFire: Boolean) {
+        ctx.strokeStyle = col
+        ctx.lineWidth = 5.0
+        ctx.shadowBlur = 15.0
+        if (firing) {
+            ctx.shadowColor = "#ffffff"
+        } else {
+            ctx.shadowColor = col 
+        }
+        if (underFire) {
+            ctx.fillStyle = col
+            ctx.shadowColor = "#ffffff"
+        } else {
+            ctx.fillStyle = "#000000"
+        }
+        ctx.beginPath()
+        ctx.moveTo(-20.0, 0.0)
+        ctx.lineTo(-20.0, -35.0)
+        ctx.lineTo(5.0, -40.0)
+        ctx.lineTo(40.0, -15.0)
+        ctx.lineTo(40.0, 15.0)
+        ctx.lineTo(5.0, 40.0)
+        ctx.lineTo(-20.0, 35.0)
+	ctx.lineTo(-20.0, 0.0)
+        ctx.moveTo(40.0, 0.0)
+        ctx.lineTo(50.0, 0.0)
+        ctx.closePath()
+        ctx.fill()
+        ctx.stroke()
+    }
+
+    private fun drawHullComplications(col: String) {
+        ctx.beginPath()
+        ctx.lineWidth = 3.0
+        ctx.lineJoin = CanvasLineJoin.Companion.ROUND
+        ctx.moveTo(10.0, 0.0)
+        ctx.lineTo(-20.0, 0.0)
+        ctx.moveTo(10.0, 0.0)
+        ctx.lineTo(-20.0, 25.0)
+        ctx.lineTo(40.0, 15.0)
+        ctx.lineTo(10.0, 0.0)
+        ctx.lineTo(40.0, -15.0)
+        ctx.lineTo(-20.0, -25.0)
+        ctx.lineTo(10.0, 0.0)
+        ctx.moveTo(-20.0, -25.0)
+        ctx.lineTo(5.0, -40.0)
+        ctx.moveTo(-20.0, 25.0)
+        ctx.lineTo(5.0, 40.0)
+        ctx.closePath()
+        ctx.stroke()
+    }
     private fun drawShip(col: String, ship1: Ship, ship2: Ship, index: Int, t: Double) {
         var ang1 = ship1.ang.toDouble() / Constants.ANGLE_DEGREES * 2 * kotlin.math.PI
         var ang2 = ship2.ang.toDouble() / Constants.ANGLE_DEGREES * 2 * kotlin.math.PI
@@ -219,112 +298,35 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             y1 = y2
         }
         val y = y1 * t + y2 * (1 - t)
+
         if (!ship1.alive) {
               if (!explodedShips.contains(index)) {
                   explodedShips.add(index)
                   for (i in 0 until 2500/total_num_ships) {
-                       val angle = Random.nextDouble() * kotlin.math.PI * 2
-                       explosions.add(Pair(Pair(x,y), Pair(kotlin.math.cos(angle) * (Random.nextDouble()*10 + 10), kotlin.math.sin(angle)*(Random.nextDouble()*10 + 10))))
+                       val theta = Random.nextDouble() * kotlin.math.PI * 2
+                       val dx = kotlin.math.cos(theta) * (Random.nextDouble()*10 + 10)
+                       val dy = kotlin.math.sin(theta) * (Random.nextDouble()*10 + 10)
+                       explosions.add(Pair(Pair(x,y), Pair(dx, dy)))
                   }
               }
 	      return
         }
 
-        // Energy bar:
         ctx.save()
         ctx.translate(x, y)
-        ctx.lineWidth = 5.0
-        ctx.strokeStyle = "#ff0000"
-        ctx.shadowColor = "#ff0000"
-        ctx.beginPath()
-        ctx.moveTo(-10.0, 60.0)
-        ctx.lineTo(-10.0 +  40.0, +60.0)
-        ctx.closePath()
-        ctx.stroke()
-        ctx.strokeStyle = "#00ff00"
-        ctx.shadowColor = "#00ff00"
-        ctx.beginPath()
-        ctx.moveTo(-10.0, 60.0)
-        ctx.lineTo(-10.0 +  ship1.energy.toDouble() * 40.0/100000.0, +60.0)
-        ctx.closePath()
-        ctx.stroke()
-
-        // Hull
-        ctx.strokeStyle = col
-        ctx.lineWidth = 5.0
-        ctx.shadowBlur = 15.0
-        if (ship1.firing) {
-            ctx.shadowColor = "#ffffff"
-        } else {
-            ctx.shadowColor = col 
-        }
-        if (ship1.underFire) {
-            ctx.fillStyle = col
-            ctx.shadowColor = "#ffffff"
-        } else {
-            ctx.fillStyle = "#000000"
-        }
-        ctx.beginPath()
+        drawBar(ship1.energy)
         ctx.rotate(ang)
-        ctx.moveTo(-20.0, 0.0)
-        ctx.lineTo(-20.0, -35.0)
-        ctx.lineTo(5.0, -40.0)
-        ctx.lineTo(40.0, -15.0)
-        ctx.lineTo(40.0, 15.0)
-        ctx.lineTo(5.0, 40.0)
-        ctx.lineTo(-20.0, 35.0)
-	ctx.lineTo(-20.0, 0.0)
-        ctx.moveTo(40.0, 0.0)
-        ctx.lineTo(50.0, 0.0)
-        ctx.closePath()
-        ctx.fill()
-        ctx.stroke()
-
-        // Hull complications
-        ctx.beginPath()
-        ctx.lineWidth = 3.0
-        ctx.lineJoin = CanvasLineJoin.Companion.ROUND
-        ctx.moveTo(10.0, 0.0)
-        ctx.lineTo(-20.0, 0.0)
-        ctx.moveTo(10.0, 0.0)
-        ctx.lineTo(-20.0, 25.0)
-        ctx.lineTo(40.0, 15.0)
-        ctx.lineTo(10.0, 0.0)
-        ctx.lineTo(40.0, -15.0)
-        ctx.lineTo(-20.0, -25.0)
-        ctx.lineTo(10.0, 0.0)
-        ctx.moveTo(-20.0, -25.0)
-        ctx.lineTo(5.0, -40.0)
-        ctx.moveTo(-20.0, 25.0)
-        ctx.lineTo(5.0, 40.0)
-        ctx.closePath()
-        ctx.stroke()
-        ctx.restore()
-
-        // Thrusters and laser:
+        drawHull(col, ship1.firing, ship1.underFire)
+        drawHullComplications(col)
         if (ship1.acc > 0 || ship1.angv < 0 ) {
-            drawThruster(x, y, ang, 20.0)
+            drawThruster(20.0)
         }
         if (ship1.acc > 0 || ship1.angv > 0) {
-            drawThruster(x, y, ang, -20.0)
+            drawThruster(-20.0)
         }
-
         if (ship1.firing) {
-            ctx.save()
-            ctx.beginPath();
-            ctx.lineWidth = 1.0 + Random.nextDouble(3.0)
-            ctx.translate(x,y)
-            ctx.rotate(ang)
-            ctx.moveTo(50.0, 0.0);
-            var hue = 200
-            hue += Random.nextInt(55)
-            ctx.strokeStyle = "rgb(255, $hue, 255)";
-            ctx.shadowColor = "#ffffff"
-            ctx.shadowBlur = 20.0
-            ctx.lineTo(Constants.FIRE_DISTANCE.toDouble(), 0.0)
-            ctx.closePath();
-            ctx.stroke()
-            ctx.restore();
+            drawBeam()
         }
+        ctx.restore()
     }
 }
