@@ -72,10 +72,10 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             active = false
             return
         }
-        // Avoid playing if the user inputs an invalid frame
+        // If the user inputs an invalid frame, play the last available
         if (frame >= res.results.size - 1) {
-            active = false
-            return
+            frame = res.results.size - 2
+            lastFrame = 0.0
         }
         if (frame == -1) {
             frame = 0
