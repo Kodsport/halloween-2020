@@ -109,10 +109,6 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         ctx.resetTransform()
         ctx.translate(w, h)
         ctx.clearRect(-w, -h, 2 * w, 2 * h)
-        ctx.fillStyle = "#00ff00"
-        ctx.font = "30px monospace"
-        ctx.fillText(ships_left.toString(), -9 * w/ 10,-9 * h/10)
-        ctx.fillText(explodedShips.size.toString(), -9 * w/ 10,-8 * h/10)
         for (star in stars) {
             val intensity = (((star.first - w) * (star.second - h)) % 255 + 255) % 255
             ctx.fillStyle = "rgb($intensity,$intensity,$intensity)"
