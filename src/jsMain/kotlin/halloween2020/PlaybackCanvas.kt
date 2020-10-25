@@ -232,12 +232,14 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         ctx.translate(x, y)
         ctx.lineWidth = 5.0
         ctx.strokeStyle = "#ff0000"
+        ctx.shadowColor = "#ff0000"
         ctx.beginPath()
         ctx.moveTo(-10.0, 60.0)
         ctx.lineTo(-10.0 +  40.0, +60.0)
         ctx.closePath()
         ctx.stroke()
         ctx.strokeStyle = "#00ff00"
+        ctx.shadowColor = "#00ff00"
         ctx.beginPath()
         ctx.moveTo(-10.0, 60.0)
         ctx.lineTo(-10.0 +  ship1.energy.toDouble() * 40.0/100000.0, +60.0)
