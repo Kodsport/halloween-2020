@@ -32,9 +32,10 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         }
         drawing
     }
-    private val explodedShips = mutableSetOf<Int>()
+    private val explodedShips = mutableSetOf<Pair<String,Int>>()
     private var explosions = mutableListOf<Pair<Pair<Double, Double>, Pair<Double, Double>>>()
     private var total_num_ships: Int = 0
+    private var ships_left: Int = 0
     private val stars = mutableListOf<Pair<Double, Double>>()
     fun play(response: SimulateResponse) {
         frame = -1
@@ -108,6 +109,10 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         ctx.resetTransform()
         ctx.translate(w, h)
         ctx.clearRect(-w, -h, 2 * w, 2 * h)
+        ctx.fillStyle = "#00ff00"
+        ctx.font = "30px monospace"
+        ctx.fillText(ships_left.toString(), -9 * w/ 10,-9 * h/10)
+        ctx.fillText(explodedShips.size.toString(), -9 * w/ 10,-8 * h/10)
         for (star in stars) {
             val intensity = (((star.first - w) * (star.second - h)) % 255 + 255) % 255
             ctx.fillStyle = "rgb($intensity,$intensity,$intensity)"
@@ -148,7 +153,6 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             val delta = particle.second
             ctx.beginPath()
             ctx.shadowColor = "rgb(255,255,255)"
-            ctx.shadowBlur = 10.0
             ctx.fillStyle = "rgb(255,255,255)"
             ctx.arc(pos.first, pos.second, 3.0, 0.0, 2*kotlin.math.PI, false)
             ctx.fill()
@@ -159,7 +163,8 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         }
 	explosions = nextExplosions
 
-        total_num_ships = map.shipPos.size
+        total_num_ships = 2 * map.shipPos.size
+	ships_left = total_num_ships - explodedShips.size
 
         turn1.ships[0].forEachIndexed { index, ship ->
             drawShip("#ff0000", ship, turn2.ships[0][index], index, t)
@@ -170,25 +175,29 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
 
     }
 
-    private fun drawThruster(offset: Double)
-    {
+    private fun drawThruster(offset: Double) {
+        ctx.beginPath()
+        if (ships_left < 20) {
             var grd = ctx.createRadialGradient(-30.0, 0.0 + offset, 5.0, -30.0, 0.0 + offset, 20.0);
             grd.addColorStop(0.0, "white");
             val intensity = 100 + Random.nextDouble() * 155
             grd.addColorStop(1.0, "rgb(255, $intensity, 0)");
-
-            ctx.beginPath()
-            ctx.fillStyle = grd
-            ctx.shadowColor = "#ffffff"
-            ctx.shadowBlur = 10.0 
-            ctx.lineWidth = 1.0
-            ctx.moveTo(-25.0, 0.0 + offset)
-            ctx.lineTo(-40.0, -10.0 + offset)
-            ctx.lineTo(-65.0, 0.0 + offset)
-            ctx.lineTo(-40.0, +10.0 + offset)
-            ctx.lineTo(-25.0, 0.0 + offset)
-            ctx.closePath()
+	    ctx.fillStyle = grd
+            }
+        ctx.shadowColor = "#ffffff"
+        ctx.lineWidth = 2.0
+        ctx.moveTo(-25.0, 0.0 + offset)
+        ctx.lineTo(-40.0, -10.0 + offset)
+        ctx.lineTo(-65.0, 0.0 + offset)
+        ctx.lineTo(-40.0, +10.0 + offset)
+        ctx.lineTo(-25.0, 0.0 + offset)
+        ctx.closePath()
+        if (ships_left < 20) {
             ctx.fill()
+        } else {
+            ctx.strokeStyle = "#ffffff"
+            ctx.stroke()
+        }
     }
  
     private fun drawBeam() {
@@ -199,7 +208,6 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             hue += Random.nextInt(55)
             ctx.strokeStyle = "rgb(255, $hue, 255)";
             ctx.shadowColor = "#ffffff"
-            ctx.shadowBlur = 20.0
             ctx.lineTo(Constants.FIRE_DISTANCE.toDouble(), 0.0)
             ctx.closePath();
             ctx.stroke()
@@ -226,7 +234,6 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
     private fun drawHull(col: String, firing: Boolean, underFire: Boolean) {
         ctx.strokeStyle = col
         ctx.lineWidth = 5.0
-        ctx.shadowBlur = 15.0
         if (firing) {
             ctx.shadowColor = "#ffffff"
         } else {
@@ -300,8 +307,8 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         val y = y1 * t + y2 * (1 - t)
 
         if (!ship1.alive) {
-              if (!explodedShips.contains(index)) {
-                  explodedShips.add(index)
+              if (!explodedShips.contains(Pair(col, index))) {
+                  explodedShips.add(Pair(col, index))
                   for (i in 0 until 2500/total_num_ships) {
                        val theta = Random.nextDouble() * kotlin.math.PI * 2
                        val dx = kotlin.math.cos(theta) * (Random.nextDouble()*10 + 10)
@@ -313,6 +320,11 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         }
 
         ctx.save()
+        if (ships_left > 20) {
+            ctx.shadowBlur = 0.0
+        } else {
+            ctx.shadowBlur = 20.0 
+        }
         ctx.translate(x, y)
         drawBar(ship1.energy)
         ctx.rotate(ang)
@@ -322,7 +334,7 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             drawThruster(20.0)
         }
         if (ship1.acc > 0 || ship1.angv > 0) {
-            drawThruster(-20.0)
+           drawThruster(-20.0)
         }
         if (ship1.firing) {
             drawBeam()
