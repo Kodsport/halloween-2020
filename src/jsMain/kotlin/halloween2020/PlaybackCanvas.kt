@@ -305,7 +305,8 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         if (!ship1.alive) {
               if (!explodedShips.contains(Pair(col, index))) {
                   explodedShips.add(Pair(col, index))
-                  for (i in 0 until 2500/total_num_ships) {
+                  var new_particles: Int = (2500 - explosions.size) / 2
+                  for (i in 0 until new_particles) {
                        val theta = Random.nextDouble() * kotlin.math.PI * 2
                        val dx = kotlin.math.cos(theta) * (Random.nextDouble()*10 + 10)
                        val dy = kotlin.math.sin(theta) * (Random.nextDouble()*10 + 10)
