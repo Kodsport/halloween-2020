@@ -11,6 +11,7 @@ import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.HTMLCanvasElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.Image
+import org.w3c.dom.*
 import kotlin.random.Random
 
 class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
@@ -31,8 +32,11 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         }
         drawing
     }
+    private val explodedShips = mutableSetOf<Pair<String,Int>>()
+    private var explosions = mutableListOf<Pair<Pair<Double, Double>, Pair<Double, Double>>>()
+    private var total_num_ships: Int = 0
+    private var ships_left: Int = 0
     private val stars = mutableListOf<Pair<Double, Double>>()
-
     fun play(response: SimulateResponse) {
         frame = -1
         lastFrame = 0.0
@@ -109,8 +113,8 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             val intensity = (((star.first - w) * (star.second - h)) % 255 + 255) % 255
             ctx.fillStyle = "rgb($intensity,$intensity,$intensity)"
             ctx.fillRect(star.first - w, star.second - h, 5.0, 5.0)
-
         }
+
         ctx.lineWidth = 20.0
         map.influenceCenters.forEachIndexed { i, planet ->
             val img = planets[i % planets.size]
@@ -138,18 +142,142 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             ctx.arc(planet.x, planet.y, map.influenceRadius.toDouble(), 0.0, 2 * kotlin.math.PI)
             ctx.stroke()
         }
+
+	val nextExplosions =  mutableListOf<Pair<Pair<Double, Double>, Pair<Double, Double>>>()
+        for (particle in explosions) {
+	    val pos = particle.first
+            val delta = particle.second
+            ctx.beginPath()
+            ctx.shadowColor = "rgb(255,255,255)"
+            ctx.fillStyle = "rgb(255,255,255)"
+            ctx.arc(pos.first, pos.second, 3.0, 0.0, 2*kotlin.math.PI, false)
+            ctx.fill()
+            ctx.closePath()
+            if (-w < pos.first && pos.first < w && -h < pos.second && pos.second < h) {
+                 nextExplosions.add(Pair(Pair(pos.first + delta.first, pos.second + delta.second), delta))
+            }
+        }
+	explosions = nextExplosions
+
+        total_num_ships = 2 * map.shipPos.size
+	ships_left = total_num_ships - explodedShips.size
+
         turn1.ships[0].forEachIndexed { index, ship ->
-            drawShip("#ff0000", ship, turn2.ships[0][index], t)
+            drawShip("#ff0000", ship, turn2.ships[0][index], index, t)
         }
         turn1.ships[1].forEachIndexed { index, ship ->
-            drawShip("#0000ff", ship, turn2.ships[1][index], t)
+            drawShip("#0000ff", ship, turn2.ships[1][index], index, t)
         }
+
     }
 
-    private fun drawShip(col: String, ship1: Ship, ship2: Ship, t: Double) {
-        if (!ship1.alive) {
-            return
+    private fun drawThruster(offset: Double) {
+        ctx.beginPath()
+        if (ships_left < 20) {
+            var grd = ctx.createRadialGradient(-30.0, 0.0 + offset, 5.0, -30.0, 0.0 + offset, 20.0);
+            grd.addColorStop(0.0, "white");
+            val intensity = 100 + Random.nextDouble() * 155
+            grd.addColorStop(1.0, "rgb(255, $intensity, 0)");
+	    ctx.fillStyle = grd
+            }
+        ctx.shadowColor = "#ffffff"
+        ctx.lineWidth = 2.0
+        ctx.moveTo(-25.0, 0.0 + offset)
+        ctx.lineTo(-40.0, -10.0 + offset)
+        ctx.lineTo(-65.0, 0.0 + offset)
+        ctx.lineTo(-40.0, +10.0 + offset)
+        ctx.lineTo(-25.0, 0.0 + offset)
+        ctx.closePath()
+        if (ships_left < 20) {
+            ctx.fill()
+        } else {
+            ctx.strokeStyle = "#ffffff"
+            ctx.stroke()
         }
+    }
+ 
+    private fun drawBeam() {
+            ctx.beginPath()
+            ctx.lineWidth = 2.0
+            ctx.moveTo(50.0, 0.0)
+            var hue = 200
+            hue += Random.nextInt(55)
+            ctx.strokeStyle = "rgb(255, $hue, 255)";
+            ctx.shadowColor = "#ffffff"
+            ctx.lineTo(Constants.FIRE_DISTANCE.toDouble(), 0.0)
+            ctx.closePath();
+            ctx.stroke()
+    }
+
+    private fun drawBar(energy: Int) { 
+        ctx.lineWidth = 5.0
+        ctx.strokeStyle = "#ff0000"
+        ctx.shadowColor = "#ff0000"
+        ctx.beginPath()
+        ctx.moveTo(-10.0, 60.0)
+        ctx.lineTo(-10.0 +  40.0, +60.0)
+        ctx.closePath()
+        ctx.stroke()
+        ctx.strokeStyle = "#00ff00"
+        ctx.shadowColor = "#00ff00"
+        ctx.beginPath()
+        ctx.moveTo(-10.0, 60.0)
+        ctx.lineTo(-10.0 +  energy.toDouble() * 40.0/100000.0, +60.0)
+        ctx.closePath()
+        ctx.stroke()
+    }
+
+    private fun drawHull(col: String, firing: Boolean, underFire: Boolean) {
+        ctx.strokeStyle = col
+        ctx.lineWidth = 5.0
+        if (firing) {
+            ctx.shadowColor = "#ffffff"
+        } else {
+            ctx.shadowColor = col 
+        }
+        if (underFire) {
+            ctx.fillStyle = col
+            ctx.shadowColor = "#ffffff"
+        } else {
+            ctx.fillStyle = "#000000"
+        }
+        ctx.beginPath()
+        ctx.moveTo(-20.0, 0.0)
+        ctx.lineTo(-20.0, -35.0)
+        ctx.lineTo(5.0, -40.0)
+        ctx.lineTo(40.0, -15.0)
+        ctx.lineTo(40.0, 15.0)
+        ctx.lineTo(5.0, 40.0)
+        ctx.lineTo(-20.0, 35.0)
+	ctx.lineTo(-20.0, 0.0)
+        ctx.moveTo(40.0, 0.0)
+        ctx.lineTo(50.0, 0.0)
+        ctx.closePath()
+        ctx.fill()
+        ctx.stroke()
+    }
+
+    private fun drawHullComplications(col: String) {
+        ctx.beginPath()
+        ctx.lineWidth = 3.0
+        ctx.lineJoin = CanvasLineJoin.Companion.ROUND
+        ctx.moveTo(10.0, 0.0)
+        ctx.lineTo(-20.0, 0.0)
+        ctx.moveTo(10.0, 0.0)
+        ctx.lineTo(-20.0, 25.0)
+        ctx.lineTo(40.0, 15.0)
+        ctx.lineTo(10.0, 0.0)
+        ctx.lineTo(40.0, -15.0)
+        ctx.lineTo(-20.0, -25.0)
+        ctx.lineTo(10.0, 0.0)
+        ctx.moveTo(-20.0, -25.0)
+        ctx.lineTo(5.0, -40.0)
+        ctx.moveTo(-20.0, 25.0)
+        ctx.lineTo(5.0, 40.0)
+        ctx.closePath()
+        ctx.stroke()
+    }
+    private fun drawShip(col: String, ship1: Ship, ship2: Ship, index: Int, t: Double) {
         var ang1 = ship1.ang.toDouble() / Constants.ANGLE_DEGREES * 2 * kotlin.math.PI
         var ang2 = ship2.ang.toDouble() / Constants.ANGLE_DEGREES * 2 * kotlin.math.PI
         var p = (ang2 - ang1 + 2 * kotlin.math.PI) % (2 * kotlin.math.PI)
@@ -174,24 +302,40 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         }
         val y = y1 * t + y2 * (1 - t)
 
-        ctx.save()
-        ctx.fillStyle = col
-        ctx.beginPath()
-        ctx.translate(x, y)
-        ctx.rotate(ang)
-        ctx.arc(0.0, 0.0, 40.0, -2.0, 2.0)
-        ctx.closePath()
-        ctx.fill()
-        ctx.restore()
-
-        if (ship1.firing) {
-            ctx.save()
-            ctx.fillStyle = "#ffffff"
-            ctx.translate(x, y)
-            ctx.rotate(ang)
-            ctx.fillRect(0.0, 0.0, 400.0, 10.0)
-            ctx.restore()
+        if (!ship1.alive) {
+              if (!explodedShips.contains(Pair(col, index))) {
+                  explodedShips.add(Pair(col, index))
+                  var new_particles: Int = (2500 - explosions.size) / 2
+                  for (i in 0 until new_particles) {
+                       val theta = Random.nextDouble() * kotlin.math.PI * 2
+                       val dx = kotlin.math.cos(theta) * (Random.nextDouble()*10 + 10)
+                       val dy = kotlin.math.sin(theta) * (Random.nextDouble()*10 + 10)
+                       explosions.add(Pair(Pair(x,y), Pair(dx, dy)))
+                  }
+              }
+	      return
         }
-    }
 
+        ctx.save()
+        if (ships_left > 20) {
+            ctx.shadowBlur = 0.0
+        } else {
+            ctx.shadowBlur = 20.0 
+        }
+        ctx.translate(x, y)
+        drawBar(ship1.energy)
+        ctx.rotate(ang)
+        drawHull(col, ship1.firing, ship1.underFire)
+        drawHullComplications(col)
+        if (ship1.acc > 0 || ship1.angv < 0 ) {
+            drawThruster(20.0)
+        }
+        if (ship1.acc > 0 || ship1.angv > 0) {
+           drawThruster(-20.0)
+        }
+        if (ship1.firing) {
+            drawBeam()
+        }
+        ctx.restore()
+    }
 }

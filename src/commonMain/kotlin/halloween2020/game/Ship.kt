@@ -9,12 +9,15 @@ class Ship(var pos: Vec, var ang: Int) {
     var alive: Boolean = true
     var vel: Double = 0.0
     var firing: Boolean = false
+    var underFire: Boolean = false
+    var acc: Int = 0
+    var angv: Int = 0
 
     fun tick(shipIdx: Int, controller: GameController, game: Game) {
-        var acc = controller.getThrust(shipIdx)
+        acc = controller.getThrust(shipIdx)
         acc = if (acc < 0) -1 else if (acc > 0) 1 else 0
         if (energy >= Constants.ROTATE_COST) {
-            var angv = controller.getAngThrust(shipIdx)
+            angv = controller.getAngThrust(shipIdx)
             angv = if (angv < 0) -1 else if (angv > 0) 1 else 0
             ang += angv * Constants.THRUST_SPEED
             ang %= Constants.ANGLE_DEGREES
@@ -24,6 +27,9 @@ class Ship(var pos: Vec, var ang: Int) {
             if (angv != 0) {
                 energy -= Constants.ROTATE_COST
             }
+        }
+        else {
+            angv = 0
         }
         if (energy >= Constants.THRUST_COST && acc != 0) {
             vel += acc
