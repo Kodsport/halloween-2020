@@ -32,6 +32,8 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
         }
         drawing
     }
+    private val explodedShips = mutableSetOf<Int>()
+    private var explosions = mutableListOf<Pair<Pair<Double, Double>, Pair<Double, Double>>>()
     private val stars = mutableListOf<Pair<Double, Double>>()
     fun play(response: SimulateResponse) {
         frame = -1
@@ -109,8 +111,8 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             val intensity = (((star.first - w) * (star.second - h)) % 255 + 255) % 255
             ctx.fillStyle = "rgb($intensity,$intensity,$intensity)"
             ctx.fillRect(star.first - w, star.second - h, 5.0, 5.0)
-
         }
+
         ctx.lineWidth = 20.0
         map.influenceCenters.forEachIndexed { i, planet ->
             val img = planets[i % planets.size]
@@ -138,12 +140,31 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             ctx.arc(planet.x, planet.y, map.influenceRadius.toDouble(), 0.0, 2 * kotlin.math.PI)
             ctx.stroke()
         }
+
+	val nextExplosions =  mutableListOf<Pair<Pair<Double, Double>, Pair<Double, Double>>>()
+        for (particle in explosions) {
+	    val pos = particle.first
+            val delta = particle.second
+            ctx.beginPath()
+            ctx.shadowColor = "rgb(255,255,255)"
+            ctx.shadowBlur = 10.0
+            ctx.fillStyle = "rgb(255,255,255)"
+            ctx.arc(pos.first, pos.second, 3.0, 0.0, 2*kotlin.math.PI, false)
+            ctx.fill()
+            ctx.closePath()
+            if (-w < pos.first && pos.first < w && -h < pos.second && pos.second < h) {
+                 nextExplosions.add(Pair(Pair(pos.first + delta.first, pos.second + delta.second), delta))
+            }
+        }
+	explosions = nextExplosions
+
         turn1.ships[0].forEachIndexed { index, ship ->
-            drawShip("#ff0000", ship, turn2.ships[0][index], t)
+            drawShip("#ff0000", ship, turn2.ships[0][index], index, t)
         }
         turn1.ships[1].forEachIndexed { index, ship ->
-            drawShip("#0000ff", ship, turn2.ships[1][index], t)
+            drawShip("#0000ff", ship, turn2.ships[1][index], index, t)
         }
+
     }
 
     private fun drawThruster(x: Double, y: Double, ang: Double, offset: Double)
@@ -154,6 +175,7 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             ctx.beginPath()
             val intensity = 100 + Random.nextDouble() * 155
             ctx.fillStyle = "rgb($intensity,$intensity,$intensity)"
+            ctx.lineWidth = 1.0
             ctx.moveTo(-25.0, 0.0 + offset)
             ctx.lineTo(-40.0, -10.0 + offset)
             ctx.lineTo(-65.0, 0.0 + offset)
@@ -164,10 +186,7 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             ctx.restore()
     }
 
-    private fun drawShip(col: String, ship1: Ship, ship2: Ship, t: Double) {
-        if (!ship1.alive) {
-            return
-        }
+    private fun drawShip(col: String, ship1: Ship, ship2: Ship, index: Int, t: Double) {
         var ang1 = ship1.ang.toDouble() / Constants.ANGLE_DEGREES * 2 * kotlin.math.PI
         var ang2 = ship2.ang.toDouble() / Constants.ANGLE_DEGREES * 2 * kotlin.math.PI
         var p = (ang2 - ang1 + 2 * kotlin.math.PI) % (2 * kotlin.math.PI)
@@ -191,8 +210,18 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             y1 = y2
         }
         val y = y1 * t + y2 * (1 - t)
+        if (!ship1.alive) {
+              if (!explodedShips.contains(index)) {
+                  explodedShips.add(index)
+                  for (i in 0 until 250) {
+                       val angle = Random.nextDouble() * kotlin.math.PI * 2
+                       explosions.add(Pair(Pair(x,y), Pair(kotlin.math.cos(angle) * Random.nextDouble()*20, kotlin.math.sin(angle)*Random.nextDouble()*20)))
+                  }
+              }
+	      return
+        }
 
-        // Engergy bar:
+        // Energy bar:
         ctx.save()
         ctx.translate(x, y)
         ctx.strokeStyle = "#00ff00"
@@ -209,16 +238,16 @@ class PlaybackCanvas(private val canvas: HTMLCanvasElement) {
             ctx.shadowColor = col
             ctx.shadowBlur = 15.0
             ctx.lineWidth = 5.0
-            }
-        else
+        } else {
             ctx.lineWidth = 5.0
+        }
         if (ship1.underFire) {
             ctx.fillStyle = col
             ctx.shadowColor = "#ffffff"
             ctx.shadowBlur = 10.0
-            }
-        else
+        } else {
             ctx.fillStyle = "#000000"
+        }
         ctx.beginPath()
         ctx.rotate(ang)
         ctx.moveTo(-20.0, 0.0)
