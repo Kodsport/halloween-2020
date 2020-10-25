@@ -73,7 +73,7 @@ object Matchmaking {
         }
         val exec1 = ExecutableParser.fromBinary(fw1!!.exec.bytes)
         val exec2 = ExecutableParser.fromBinary(fw2!!.exec.bytes)
-        val map = GameMaps.Maps.entries.filter { entry -> entry.key != "armada" }.random()
+        val map = GameMaps.Maps.entries.filter { entry -> setOf("armadav2", "faceoff", "center").contains(entry.key) }.random()
         val result = MatchResult(runGame(exec1, exec2, map.value))
         val resultJson = Json.encodeToJsonElement(result).toString()
         val s1 = result.turns.last().p1Score
